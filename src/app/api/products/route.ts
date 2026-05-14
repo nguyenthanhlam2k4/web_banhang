@@ -26,10 +26,25 @@ export async function GET(request: Request) {
     // Category
     const category = searchParams.get('category');
     if (category) {
-      // Find category by slug first if slug is provided
+      // Try to find by slug first
       const foundCategory = await Category.findOne({ slug: category });
-      if (foundCategory) {
-        query.category = foundCategory._id;
+      const categoryId = foundCategory ? foundCategory._id : category;
+      
+      // If we are looking for related products, we might want OR logic with brand
+      const brand = searchParams.get('brand');
+      if (brand && searchParams.get('related') === 'true') {
+        query.$or = [
+          { categories: { $in: [categoryId] } },
+          { brand: brand }
+        ];
+      } else {
+        query.categories = { $in: [categoryId] };
+      }
+    } else {
+      // Brand only (if not already handled in $or)
+      const brand = searchParams.get('brand');
+      if (brand) {
+        query.brand = brand;
       }
     }
 
@@ -58,7 +73,7 @@ export async function GET(request: Request) {
     if (sortParam === 'oldest') sort = { createdAt: 1 };
 
     const products = await Product.find(query)
-      .populate('category', 'name slug')
+      .populate('categories', 'name slug')
       .sort(sort)
       .skip(skip)
       .limit(limit);

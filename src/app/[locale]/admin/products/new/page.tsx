@@ -41,7 +41,7 @@ export default function NewProductPage() {
     description: z.string().min(10, t('descRequired')),
     price: z.coerce.number().min(0, t('pricePositive')),
     comparePrice: z.coerce.number().optional(),
-    category: z.string().min(1, t('categoryRequired')),
+    categories: z.array(z.string()).min(1, t('categoryRequired')),
     brand: z.string().min(1, t('brandRequired')),
     stock: z.coerce.number().min(0, t('stockNegative')),
     featured: z.boolean().default(false),
@@ -55,7 +55,7 @@ export default function NewProductPage() {
       description: '',
       price: 0,
       comparePrice: 0,
-      category: '',
+      categories: [],
       brand: '',
       stock: 0,
       featured: false,
@@ -304,16 +304,31 @@ export default function NewProductPage() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label className="font-bold text-xs uppercase tracking-wider text-muted-foreground">{t('category')}</Label>
-                <select
-                  {...register('category')}
-                  className="w-full rounded-xl h-12 bg-secondary/20 border-none px-4 text-sm focus:ring-1 focus:ring-primary outline-none appearance-none"
-                >
-                  <option value="">{t('selectCategory')}</option>
+                <div className="space-y-2 max-h-48 overflow-y-auto p-4 bg-secondary/20 rounded-xl border border-border/50">
                   {categories.map((cat) => (
-                    <option key={cat._id} value={cat._id}>{cat.name}</option>
+                    <div key={cat._id} className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        id={`cat-${cat._id}`}
+                        value={cat._id}
+                        checked={(watch('categories') || []).includes(cat._id)}
+                        onChange={(e) => {
+                          const currentCats = watch('categories') || [];
+                          if (e.target.checked) {
+                            setValue('categories', [...currentCats, cat._id]);
+                          } else {
+                            setValue('categories', currentCats.filter((id: string) => id !== cat._id));
+                          }
+                        }}
+                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                      />
+                      <label htmlFor={`cat-${cat._id}`} className="text-sm font-medium cursor-pointer">
+                        {cat.name}
+                      </label>
+                    </div>
                   ))}
-                </select>
-                {errors.category && <p className="text-xs text-destructive font-bold">{errors.category.message as string}</p>}
+                </div>
+                {errors.categories && <p className="text-xs text-destructive font-bold">{errors.categories.message as string}</p>}
               </div>
 
               <div className="space-y-2">

@@ -36,7 +36,7 @@ export async function GET(request: Request) {
         { $match: { isPaid: true } },
         { $group: { _id: null, total: { $sum: '$totalPrice' } } }
       ]),
-      Product.find().sort({ createdAt: -1 }).limit(5).populate('category', 'name'),
+      Product.find().sort({ createdAt: -1 }).limit(5).populate('categories', 'name'),
       User.find().sort({ createdAt: -1 }).limit(5),
       Order.find().sort({ createdAt: -1 }).limit(5).populate('user', 'name'),
     ]);

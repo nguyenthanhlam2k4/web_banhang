@@ -131,7 +131,7 @@ export default function AdminDashboard() {
                 <tr className="text-[10px] font-black uppercase tracking-widest text-muted-foreground bg-secondary/20 border-b border-border/50">
                   <th className="px-6 py-3">{t('orderCode')}</th>
                   <th className="px-6 py-3">{t('customer')}</th>
-                  <th className="px-6 py-3">{ct('status')}</th>
+                  <th className="px-6 py-3">{ct('status.label')}</th>
                   <th className="px-6 py-3 text-right">{ct('total')}</th>
                 </tr>
               </thead>

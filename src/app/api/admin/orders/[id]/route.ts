@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Order from '@/models/Order';
+import Review from '@/models/Review';
 import { jwtVerify } from 'jose';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret');
@@ -53,7 +54,7 @@ export async function GET(
   if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload }: any = await jwtVerify(token, JWT_SECRET);
     await dbConnect();
     const { id } = await params;
     
@@ -68,7 +69,24 @@ export async function GET(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    return NextResponse.json({ success: true, data: order });
+    // Convert order to object to add virtual fields
+    const orderObj = order.toObject();
+
+    // Check which items have been reviewed by this user FOR THIS ORDER
+    const reviews = await Review.find({
+      user: payload.id,
+      order: id,
+      product: { $in: order.orderItems.map((item: any) => item.product) }
+    });
+
+    const reviewedProductIds = new Set(reviews.map(r => r.product.toString()));
+
+    orderObj.orderItems = orderObj.orderItems.map((item: any) => ({
+      ...item,
+      isReviewed: reviewedProductIds.has(item.product.toString())
+    }));
+
+    return NextResponse.json({ success: true, data: orderObj });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }

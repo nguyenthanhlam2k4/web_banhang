@@ -51,6 +51,7 @@ export function Navbar() {
   const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const { user, clearAuth } = useAuthStore();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const NAV_LINKS = [
     { name: t('home'), href: '/' },
@@ -142,55 +143,58 @@ export function Navbar() {
                     )}
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 bg-popover border border-border/50 shadow-xl">
+                <DropdownMenuContent align="end" className="w-64 rounded-[1.25rem] p-1.5 bg-popover/90 backdrop-blur-xl border border-border/50 shadow-2xl space-y-1">
                   <DropdownMenuGroup>
-                    <DropdownMenuLabel className="font-normal p-3">
+                    <DropdownMenuLabel className="font-normal p-4 pb-3">
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-bold leading-none">{user.name}</p>
+                        <p className="text-base font-bold leading-none text-foreground">{user.name}</p>
                         <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
                       </div>
                     </DropdownMenuLabel>
                   </DropdownMenuGroup>
-                  <DropdownMenuSeparator />
+                  <DropdownMenuSeparator className="mx-2 !my-1 opacity-50" />
+
                   {user.role === 'admin' && (
-                    <DropdownMenuItem asChild className="rounded-xl p-3 cursor-pointer text-primary bg-primary/5 focus:bg-primary/10">
-                      <Link href="/admin" className="flex items-center w-full">
-                        <LayoutDashboard className="mr-2 h-4 w-4" />
-                        <span>{t('admin')}</span>
+                    <DropdownMenuItem asChild className="rounded-xl py-3.5 px-4 my-2 cursor-pointer text-primary bg-primary/5 focus:bg-primary/10">
+                      <Link href="/admin" className="flex items-center w-full gap-4">
+                        <LayoutDashboard className="h-5 w-5" />
+                        <span className="font-bold">{t('admin')}</span>
                       </Link>
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem asChild className="rounded-xl p-3 cursor-pointer">
-                    <Link href="/profile" className="flex items-center w-full">
-                      <UserIcon className="mr-2 h-4 w-4" />
-                      <span>{t('profile')}</span>
+                  <DropdownMenuItem asChild className="rounded-xl py-3.5 px-4 my-2 cursor-pointer">
+                    <Link href="/profile" className="flex items-center w-full gap-4">
+                      <UserIcon className="h-5 w-5 text-muted-foreground" />
+                      <span className="font-medium">{t('profile')}</span>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="rounded-xl p-3 cursor-pointer">
-                    <Link href="/orders" className="flex items-center w-full">
-                      <Package className="mr-2 h-4 w-4" />
-                      <span>{t('orders') || 'My Orders'}</span>
+                  <DropdownMenuItem asChild className="rounded-xl py-3.5 px-4 my-2 cursor-pointer">
+                    <Link href="/orders" className="flex items-center w-full gap-4">
+                      <Package className="h-5 w-5 text-muted-foreground" />
+                      <span className="font-medium">{t('orders') || 'My Orders'}</span>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="rounded-xl p-3 cursor-pointer">
-                    <Link href="/wishlist" className="flex items-center w-full">
-                      <Heart className="mr-2 h-4 w-4" />
-                      <span>{t('wishlist') || 'Wishlist'}</span>
+                  <DropdownMenuItem asChild className="rounded-xl py-3.5 px-4 my-2 cursor-pointer">
+                    <Link href="/wishlist" className="flex items-center w-full gap-4">
+                      <Heart className="h-5 w-5 text-muted-foreground" />
+                      <span className="font-medium">{t('wishlist') || 'Wishlist'}</span>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="rounded-xl p-3 cursor-pointer">
-                    <Link href="/settings" className="flex items-center w-full">
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>{t('settings') || 'Settings'}</span>
+                  <DropdownMenuItem asChild className="rounded-xl py-3.5 px-4 my-2 cursor-pointer">
+                    <Link href="/settings" className="flex items-center w-full gap-4">
+                      <Settings className="h-5 w-5 text-muted-foreground" />
+                      <span className="font-medium">{t('settings') || 'Settings'}</span>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
+                  <DropdownMenuSeparator className="mx-2 my-3" />
                   <DropdownMenuItem 
-                    className="rounded-xl p-3 cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
+                    className="rounded-xl py-3.5 px-4 my-2 cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
                     onClick={handleLogout}
                   >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>{t('logout')}</span>
+                    <div className="flex items-center gap-4">
+                      <LogOut className="h-5 w-5" />
+                      <span className="font-bold">{t('logout')}</span>
+                    </div>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -204,48 +208,145 @@ export function Navbar() {
 
             {/* Mobile Menu */}
             <div className="md:hidden">
-              <Sheet>
+              <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full">
+                  <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 transition-colors">
                     <Menu className="h-6 w-6" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-full sm:max-w-xs">
-                  <SheetHeader>
-                    <SheetTitle className="text-left flex items-center gap-2">
-                      <ShoppingBag className="h-6 w-6 text-primary" />
-                      <span>Premium<span className="text-primary">Store</span></span>
-                    </SheetTitle>
-                  </SheetHeader>
-                  <div className="flex flex-col gap-6 mt-12">
-                    {NAV_LINKS.map((link) => (
-                      <Link
-                        key={link.name}
-                        href={link.href as any}
-                        className={cn(
-                          'text-lg font-medium py-2 border-b border-border/50',
-                          pathname === link.href ? 'text-primary' : 'text-foreground'
-                        )}
-                      >
-                        {link.name}
-                      </Link>
-                    ))}
-                    <div className="flex flex-col gap-4 mt-4">
-                      {user ? (
-                        <Button variant="destructive" className="w-full rounded-xl py-6" onClick={handleLogout}>
-                          {t('logout')}
-                        </Button>
-                      ) : (
-                        <>
-                          <Link href="/login">
-                            <Button className="w-full rounded-xl py-6">{t('login')}</Button>
+                <SheetContent side="right" className="w-full sm:max-w-xs p-0 flex flex-col border-l border-border/50">
+                  <div className="p-6 border-b border-border/50 bg-background/50 backdrop-blur-xl sticky top-0 z-10">
+                    <SheetHeader>
+                      <SheetTitle className="text-left flex items-center justify-between">
+                        <Link href="/" className="flex items-center gap-2" onClick={() => setIsMobileMenuOpen(false)}>
+                          <div className="p-1.5 bg-primary rounded-lg">
+                            <ShoppingBag className="h-5 w-5 text-primary-foreground" />
+                          </div>
+                          <span className="font-bold tracking-tight">
+                            Premium<span className="text-primary">Store</span>
+                          </span>
+                        </Link>
+                      </SheetTitle>
+                    </SheetHeader>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto">
+                    {/* User Profile Section in Mobile Menu */}
+                    {user && (
+                      <div className="p-6 bg-primary/5 border-b border-border/50">
+                        <div className="flex items-center gap-4">
+                          <div className="h-14 w-14 rounded-full overflow-hidden border-2 border-primary/20 shadow-inner">
+                            {user.avatar ? (
+                              <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" />
+                            ) : (
+                              <div className="h-full w-full bg-primary/10 flex items-center justify-center">
+                                <UserIcon className="h-7 w-7 text-primary" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex flex-col min-w-0">
+                            <span className="font-bold text-lg leading-none mb-1 truncate">{user.name}</span>
+                            <span className="text-xs text-muted-foreground truncate">{user.email}</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="p-4 space-y-6">
+                      {/* Main Navigation */}
+                      <div className="space-y-1">
+                        <p className="px-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2">Navigation</p>
+                        {NAV_LINKS.map((link) => (
+                          <Link
+                            key={link.name}
+                            href={link.href as any}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className={cn(
+                              'flex items-center gap-3 py-3.5 px-4 rounded-xl transition-all duration-200 group',
+                              pathname === link.href 
+                                ? 'bg-primary text-primary-foreground font-bold shadow-lg shadow-primary/20' 
+                                : 'text-foreground hover:bg-secondary/80'
+                            )}
+                          >
+                            <span className="flex-1">{link.name}</span>
                           </Link>
-                          <Link href="/register">
-                            <Button variant="outline" className="w-full rounded-xl py-6">{t('register')}</Button>
+                        ))}
+                      </div>
+
+                      {/* Account Section */}
+                      {user && (
+                        <div className="space-y-1">
+                          <p className="px-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2">My Account</p>
+                          <Link
+                            href="/profile"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="flex items-center gap-3 py-3.5 px-4 rounded-xl text-foreground hover:bg-secondary/80 transition-all group"
+                          >
+                            <div className="p-2 rounded-lg bg-secondary/50 text-muted-foreground group-hover:text-primary group-hover:bg-primary/10 transition-colors">
+                              <UserIcon className="h-4 w-4" />
+                            </div>
+                            <span className="flex-1">{t('profile')}</span>
                           </Link>
-                        </>
+                          <Link
+                            href="/wishlist"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="flex items-center gap-3 py-3.5 px-4 rounded-xl text-foreground hover:bg-secondary/80 transition-all group"
+                          >
+                            <div className="p-2 rounded-lg bg-secondary/50 text-muted-foreground group-hover:text-primary group-hover:bg-primary/10 transition-colors">
+                              <Heart className="h-4 w-4" />
+                            </div>
+                            <span className="flex-1">{t('wishlist')}</span>
+                          </Link>
+                          <Link
+                            href="/orders"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="flex items-center gap-3 py-3.5 px-4 rounded-xl text-foreground hover:bg-secondary/80 transition-all group"
+                          >
+                            <div className="p-2 rounded-lg bg-secondary/50 text-muted-foreground group-hover:text-primary group-hover:bg-primary/10 transition-colors">
+                              <Package className="h-4 w-4" />
+                            </div>
+                            <span className="flex-1">{t('orders')}</span>
+                          </Link>
+                          {user.role === 'admin' && (
+                            <Link
+                              href="/admin"
+                              onClick={() => setIsMobileMenuOpen(false)}
+                              className="flex items-center gap-3 py-3.5 px-4 rounded-xl text-primary bg-primary/5 font-bold hover:bg-primary/10 transition-all"
+                            >
+                              <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                                <LayoutDashboard className="h-4 w-4" />
+                              </div>
+                              <span className="flex-1">{t('admin')}</span>
+                            </Link>
+                          )}
+                        </div>
                       )}
                     </div>
+                  </div>
+
+                  <div className="p-6 border-t border-border/50 bg-secondary/10">
+                    {user ? (
+                      <Button 
+                        variant="destructive" 
+                        className="w-full rounded-xl py-6 flex items-center gap-2 shadow-lg shadow-destructive/10 hover:scale-[1.02] active:scale-[0.98] transition-all" 
+                        onClick={() => {
+                          handleLogout();
+                          setIsMobileMenuOpen(false);
+                        }}
+                      >
+                        <LogOut className="h-5 w-5" />
+                        <span className="font-bold">{t('logout')}</span>
+                      </Button>
+                    ) : (
+                      <div className="flex flex-col gap-3">
+                        <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                          <Button className="w-full rounded-xl py-6 shadow-lg shadow-primary/20">{t('login')}</Button>
+                        </Link>
+                        <Link href="/register" onClick={() => setIsMobileMenuOpen(false)}>
+                          <Button variant="outline" className="w-full rounded-xl py-6 bg-background/50">{t('register')}</Button>
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 </SheetContent>
               </Sheet>

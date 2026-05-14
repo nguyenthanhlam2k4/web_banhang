@@ -1,14 +1,55 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from '@/i18n/routing';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, ShoppingBag, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
+import axios from 'axios';
+import { useCartStore } from '@/store/useCartStore';
+import { toast } from 'sonner';
 
 export function Hero() {
   const t = useTranslations('Hero');
+  const addItem = useCartStore((state) => state.addItem);
+  const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const { data } = await axios.get('/api/products?featured=true&limit=5');
+        if (data.success && data.data.length > 0) {
+          setFeaturedProducts(data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch featured products');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFeatured();
+  }, []);
+
+  useEffect(() => {
+    if (featuredProducts.length > 1) {
+      const timer = setInterval(() => {
+        setCurrentIndex((prev) => (prev + 1) % featuredProducts.length);
+      }, 5000);
+      return () => clearInterval(timer);
+    }
+  }, [featuredProducts]);
+
+  const currentProduct = featuredProducts[currentIndex];
+
+  const handleAddToCart = (e: React.MouseEvent, product: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addItem(product);
+    toast.success(`${product.name} đã được thêm vào giỏ hàng`);
+  };
 
   return (
     <section className="relative overflow-hidden pt-20 pb-12 lg:pt-32 lg:pb-24">
@@ -96,24 +137,57 @@ export function Hero() {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="flex-1 relative w-full max-w-lg lg:max-w-none aspect-square lg:aspect-auto h-[400px] lg:h-[600px]"
+            className="flex-1 relative w-full max-w-lg lg:max-w-none aspect-square lg:aspect-auto h-[500px] lg:h-[650px]"
           >
             <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-violet-500/20 rounded-[3rem] rotate-3 blur-2xl" />
             <div className="relative h-full w-full bg-secondary rounded-[3rem] border border-border/50 overflow-hidden premium-shadow group">
-              <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1999&auto=format&fit=crop')] bg-cover bg-center transition-transform duration-700 group-hover:scale-110" />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+              
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentProduct?._id || 'fallback'}
+                  initial={{ opacity: 0, scale: 1.1 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.7, ease: "easeInOut" }}
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{ 
+                    backgroundImage: `url(${currentProduct?.images?.[0] || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1999&auto=format&fit=crop'})` 
+                  }}
+                />
+              </AnimatePresence>
+
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               
               <div className="absolute bottom-8 left-8 right-8 p-6 glass rounded-2xl">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-primary mb-1">{t('featured')}</p>
-                    <h3 className="text-xl font-bold">{t('watchTitle')}</h3>
-                    <p className="text-sm text-muted-foreground">$299.00</p>
-                  </div>
-                  <Button size="icon" className="rounded-full h-12 w-12">
-                    <ShoppingBag className="h-5 w-5" />
-                  </Button>
-                </div>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentProduct?._id || 'info-fallback'}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.4 }}
+                    className="flex items-center justify-between"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-primary mb-1">{t('featured')}</p>
+                      <h3 className="text-xl font-bold truncate text-white">
+                        {currentProduct?.name || t('watchTitle')}
+                      </h3>
+                      <p className="text-sm text-white/80">
+                        {currentProduct ? `$${currentProduct.price.toLocaleString()}` : '$299.00'}
+                      </p>
+                    </div>
+                    {currentProduct && (
+                      <Button 
+                        size="icon" 
+                        className="rounded-full h-12 w-12 flex-shrink-0 shadow-lg shadow-primary/20 hover:scale-110 active:scale-95 transition-all"
+                        onClick={(e) => handleAddToCart(e, currentProduct)}
+                      >
+                        <ShoppingBag className="h-5 w-5" />
+                      </Button>
+                    )}
+                  </motion.div>
+                </AnimatePresence>
               </div>
             </div>
 
@@ -121,7 +195,7 @@ export function Hero() {
             <motion.div 
               animate={{ y: [0, -20, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-              className="absolute -top-6 -right-6 h-24 w-24 bg-background rounded-2xl border border-border/50 p-4 premium-shadow flex items-center justify-center"
+              className="absolute -top-6 -right-6 h-24 w-24 bg-background rounded-2xl border border-border/50 p-4 premium-shadow flex items-center justify-center z-10"
             >
               <div className="h-full w-full bg-primary/10 rounded-xl flex items-center justify-center">
                 <Sparkles className="h-8 w-8 text-primary" />
@@ -133,4 +207,5 @@ export function Hero() {
     </section>
   );
 }
+
 

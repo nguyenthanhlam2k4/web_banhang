@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Laptop, Watch, Shirt, Home, Package } from 'lucide-react';
+import { ArrowRight, Package } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import axios from 'axios';
 import { useTranslations } from 'next-intl';
@@ -29,19 +29,6 @@ export function Categories() {
     }
   };
 
-  // Helper to get random icon if none provided
-  const getIcon = (idx: number) => {
-    const icons = [Laptop, Watch, Shirt, Home];
-    return icons[idx % icons.length];
-  };
-
-  const colors = [
-    'bg-blue-500/10 text-blue-500',
-    'bg-orange-500/10 text-orange-500',
-    'bg-pink-500/10 text-pink-500',
-    'bg-emerald-500/10 text-emerald-500',
-  ];
-
   return (
     <section className="py-24 bg-secondary/20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -60,7 +47,7 @@ export function Categories() {
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-64 rounded-[2.5rem] bg-background border border-border/50 animate-pulse" />
+              <div key={i} className="h-96 rounded-[2.5rem] bg-background border border-border/50 animate-pulse" />
             ))}
           </div>
         ) : categories.length === 0 ? (
@@ -71,27 +58,46 @@ export function Categories() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {categories.map((category, idx) => {
-              const Icon = getIcon(idx);
               return (
                 <motion.div
                   key={category._id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: idx * 0.1 }}
                 >
                   <Link 
                     href={`/shop?category=${category.slug}`}
-                    className="group block p-8 rounded-[2rem] bg-background border border-border/50 hover:border-primary/50 transition-all duration-300 premium-shadow hover:-translate-y-2"
+                    className="group relative block h-[450px] rounded-[2.5rem] overflow-hidden border border-border/50 transition-all duration-500 premium-shadow hover:-translate-y-2"
                   >
-                    <div className={`w-16 h-16 rounded-2xl ${colors[idx % colors.length]} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                      <Icon className="h-8 w-8" />
+                    {/* Background Image */}
+                    <div className="absolute inset-0">
+                      {category.image ? (
+                        <img 
+                          src={category.image} 
+                          alt={category.name} 
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-secondary flex items-center justify-center">
+                          <Package className="h-12 w-12 opacity-20" />
+                        </div>
+                      )}
+                      {/* Overlays */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300" />
                     </div>
-                    <h3 className="text-xl font-bold mb-1 line-clamp-1">{category.name}</h3>
-                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{category.description || t('categoriesSection.fallbackDesc', { name: category.name })}</p>
-                    <div className="flex items-center text-xs font-bold text-primary opacity-0 group-hover:opacity-100 transition-all">
-                      {t('categoriesSection.exploreNow')}
-                      <ArrowRight className="ml-2 h-3 w-3" />
+
+                    {/* Content */}
+                    <div className="absolute inset-0 p-8 flex flex-col justify-end items-start text-white">
+                      <h3 className="text-3xl font-black mb-2 tracking-tight drop-shadow-lg">{category.name}</h3>
+                      <p className="text-sm text-white/70 mb-6 line-clamp-2 max-w-[200px] font-medium leading-relaxed">
+                        {category.description || t('categoriesSection.fallbackDesc', { name: category.name })}
+                      </p>
+                      
+                      <div className="flex items-center gap-2 px-6 py-3 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white font-bold text-sm transition-all duration-300 group-hover:bg-primary group-hover:border-primary group-hover:scale-105">
+                        {t('categoriesSection.exploreNow')}
+                        <ArrowRight className="h-4 w-4" />
+                      </div>
                     </div>
                   </Link>
                 </motion.div>

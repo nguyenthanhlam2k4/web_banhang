@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
+import Review from '@/models/Review';
 import Product from '@/models/Product';
-import Category from '@/models/Category';
+import User from '@/models/User';
 import { jwtVerify } from 'jose';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret');
@@ -25,51 +26,30 @@ export async function GET(request: Request) {
   try {
     await dbConnect();
     const { searchParams } = new URL(request.url);
-    const search = searchParams.get('search') || '';
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const skip = (page - 1) * limit;
 
-    const query = search ? { name: { $regex: search, $options: 'i' } } : {};
+    const reviews = await Review.find()
+      .populate('product', 'name slug images')
+      .populate('user', 'name email avatar')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
-    const [products, total] = await Promise.all([
-      Product.find(query)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .populate('categories', 'name'),
-      Product.countDocuments(query),
-    ]);
+    const total = await Review.countDocuments();
 
     return NextResponse.json({
       success: true,
-      data: products,
+      data: reviews,
       pagination: {
         total,
-        page,
         pages: Math.ceil(total / limit),
-      },
+        page,
+        limit
+      }
     });
   } catch (error: any) {
-    console.error('Admin Products API Error:', error);
-    return NextResponse.json({ 
-      success: false, 
-      error: error.message 
-    }, { status: 400 });
-  }
-}
-
-export async function POST(request: Request) {
-  if (!(await isAdmin(request))) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  try {
-    await dbConnect();
-    const body = await request.json();
-    const product = await Product.create(body);
-    return NextResponse.json({ success: true, data: product });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

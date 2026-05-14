@@ -7,6 +7,7 @@ export interface IUser extends Document {
   password?: string;
   role: 'user' | 'admin';
   avatar?: string;
+  wishlist: mongoose.Types.ObjectId[];
   comparePassword: (password: string) => Promise<boolean>;
 }
 
@@ -37,6 +38,12 @@ const UserSchema: Schema = new Schema(
       type: String,
       default: 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
     },
+    wishlist: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Product',
+      },
+    ],
   },
   { timestamps: true }
 );

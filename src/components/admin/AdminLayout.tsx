@@ -16,7 +16,8 @@ import {
   Search,
   Bell,
   Settings,
-  ChevronRight
+  ChevronRight,
+  MessageSquare
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -41,6 +42,7 @@ const ADMIN_LINKS = [
   { name: 'Products', href: '/admin/products', icon: Package },
   { name: 'Categories', href: '/admin/categories', icon: List },
   { name: 'Orders', href: '/admin/orders', icon: ShoppingBag },
+  { name: 'Reviews', href: '/admin/reviews', icon: MessageSquare },
   { name: 'Users', href: '/admin/users', icon: Users },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];

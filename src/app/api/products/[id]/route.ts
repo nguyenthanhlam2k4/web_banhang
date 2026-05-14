@@ -14,9 +14,9 @@ export async function GET(
     // Try finding by ID first, then by slug
     let product;
     if (id.match(/^[0-9a-fA-F]{24}$/)) {
-      product = await Product.findById(id).populate('category', 'name slug');
+      product = await Product.findById(id).populate('categories', 'name slug');
     } else {
-      product = await Product.findOne({ slug: id }).populate('category', 'name slug');
+      product = await Product.findOne({ slug: id }).populate('categories', 'name slug');
     }
 
     if (!product) {

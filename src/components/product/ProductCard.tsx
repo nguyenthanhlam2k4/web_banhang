@@ -7,7 +7,10 @@ import { ShoppingCart, Eye, Heart, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useCartStore } from '@/store/useCartStore';
+import { useWishlistStore } from '@/store/useWishlistStore';
+import { useAuthStore } from '@/store/useAuthStore';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 interface ProductCardProps {
   product: any;
@@ -15,6 +18,8 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const addItem = useCartStore((state) => state.addItem);
+  const { toggleWishlist, isInWishlist } = useWishlistStore();
+  const { user } = useAuthStore();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -22,6 +27,18 @@ export function ProductCard({ product }: ProductCardProps) {
     addItem(product);
     toast.success(`Added ${product.name} to cart`);
   };
+
+  const handleWishlist = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user) {
+      toast.error('Please login to add to wishlist');
+      return;
+    }
+    await toggleWishlist(product._id);
+  };
+
+  const isLiked = isInWishlist(product._id);
 
   const discount = product.comparePrice 
     ? Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)
@@ -51,8 +68,16 @@ export function ProductCard({ product }: ProductCardProps) {
 
       {/* Quick Actions */}
       <div className="absolute top-4 right-4 z-10 flex flex-col gap-2 translate-x-12 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
-        <Button size="icon" variant="secondary" className="rounded-full shadow-lg hover:bg-primary hover:text-white transition-colors">
-          <Heart className="h-4 w-4" />
+        <Button 
+          size="icon" 
+          variant="secondary" 
+          className={cn(
+            "rounded-full shadow-lg transition-all duration-300",
+            isLiked ? "bg-primary text-white scale-110" : "hover:bg-primary hover:text-white"
+          )}
+          onClick={handleWishlist}
+        >
+          <Heart className={cn("h-4 w-4", isLiked && "fill-current")} />
         </Button>
         <Link href={`/shop/${product.slug}`}>
           <Button size="icon" variant="secondary" className="rounded-full shadow-lg hover:bg-primary hover:text-white transition-colors">
@@ -77,7 +102,7 @@ export function ProductCard({ product }: ProductCardProps) {
       <div className="p-5 space-y-3">
         <div className="space-y-1">
           <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
-            {product.category?.name || product.brand}
+            {product.categories?.[0]?.name || product.brand}
           </p>
           <Link href={`/shop/${product.slug}`}>
             <h3 className="font-bold text-lg line-clamp-1 group-hover:text-primary transition-colors">

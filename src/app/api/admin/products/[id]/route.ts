@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Product from '@/models/Product';
+import Category from '@/models/Category';
 import { jwtVerify } from 'jose';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret');
@@ -27,7 +28,7 @@ export async function GET(
   try {
     await dbConnect();
     const { id } = await params;
-    const product = await Product.findById(id).populate('category');
+    const product = await Product.findById(id).populate('categories');
     if (!product) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     return NextResponse.json({ success: true, data: product });
   } catch (error: any) {

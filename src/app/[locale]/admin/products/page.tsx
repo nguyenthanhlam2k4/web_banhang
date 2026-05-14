@@ -51,6 +51,7 @@ export default function AdminProductsPage() {
         setPagination(data.pagination);
       }
     } catch (error) {
+      console.error('Fetch Error:', error.response?.data || error.message);
       toast.error(t('products.fetchError'));
     } finally {
       setLoading(false);
@@ -156,9 +157,17 @@ export default function AdminProductsPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <Badge variant="outline" className="rounded-lg bg-secondary/50 border-none font-bold text-[10px]">
-                        {product.category?.name || ct('status.all')}
-                      </Badge>
+                      <div className="flex flex-wrap gap-1">
+                        {product.categories && product.categories.length > 0 ? (
+                          product.categories.map((cat: any) => (
+                            <Badge key={cat._id} variant="outline" className="rounded-lg bg-secondary/50 border-none font-bold text-[10px]">
+                              {cat.name}
+                            </Badge>
+                          ))
+                        ) : (
+                          <span className="text-muted-foreground italic text-xs">{ct('all')}</span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <p className="font-black text-sm">${product.price.toLocaleString()}</p>

@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Sparkles, Loader2, ArrowRight, Zap, Info } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Sparkles, Loader2, ArrowRight, Zap, Info, RefreshCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
@@ -18,42 +18,75 @@ interface AIRecommendationProps {
 export function AIRecommendation({ currentProductId, category }: AIRecommendationProps) {
   const t = useTranslations('Product');
   const [recommendation, setRecommendation] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<boolean>(false);
 
-  useEffect(() => {
-    const fetchRecommendation = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.post('/api/ai/recommend', {
-          productId: currentProductId,
-          category: category,
-        });
+  const fetchRecommendation = useCallback(async () => {
+    if (!currentProductId) return;
+    
+    try {
+      setLoading(true);
+      setError(false);
+      const response = await axios.post('/api/ai/recommend', {
+        productId: currentProductId,
+        category: category,
+      });
 
-        if (response.data.success) {
-          setRecommendation(response.data.content);
-        }
-      } catch (error) {
-        console.error("Failed to fetch AI recommendation:", error);
-      } finally {
-        setLoading(false);
+      if (response.data.success) {
+        setRecommendation(response.data.content);
+      } else {
+        setError(true);
       }
-    };
-
-    if (currentProductId) {
-      fetchRecommendation();
+    } catch (error) {
+      console.error("Failed to fetch AI recommendation:", error);
+      setError(true);
+    } finally {
+      setLoading(false);
     }
   }, [currentProductId, category]);
 
+  useEffect(() => {
+    fetchRecommendation();
+  }, [fetchRecommendation]);
+
   if (loading) {
     return (
-      <div className="p-8 bg-primary/5 rounded-3xl border border-primary/10 flex flex-col items-center justify-center space-y-4">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-sm font-medium text-muted-foreground animate-pulse">{t('aiAnalysis')}</p>
+      <div className="p-12 bg-primary/5 rounded-[3rem] border border-primary/10 flex flex-col items-center justify-center space-y-4 min-h-[300px]">
+        <div className="relative">
+          <Loader2 className="h-12 w-12 animate-spin text-primary opacity-20" />
+          <Sparkles className="h-6 w-6 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+        </div>
+        <div className="space-y-2 text-center">
+          <p className="text-lg font-bold text-primary animate-pulse">{t('aiAnalysis')}</p>
+          <p className="text-xs text-muted-foreground">Sử dụng trí tuệ nhân tạo để phân tích thông số kỹ thuật...</p>
+        </div>
       </div>
     );
   }
 
-  if (!recommendation) return null;
+  if (error || (!loading && !recommendation)) {
+    return (
+      <div className="p-12 bg-secondary/10 rounded-[3rem] border border-border/50 flex flex-col items-center justify-center text-center space-y-6">
+        <div className="p-4 bg-background rounded-2xl shadow-sm">
+          <Info className="h-8 w-8 text-muted-foreground/50" />
+        </div>
+        <div className="space-y-2">
+          <h3 className="text-xl font-bold">Không thể tải phân tích AI</h3>
+          <p className="text-muted-foreground max-w-xs mx-auto text-sm">
+            Dịch vụ AI đang tạm thời gián đoạn hoặc chưa có đủ dữ liệu cho sản phẩm này.
+          </p>
+        </div>
+        <Button 
+          variant="outline" 
+          onClick={fetchRecommendation}
+          className="rounded-xl px-8 h-12 gap-2 hover:bg-primary hover:text-white transition-all"
+        >
+          <RefreshCcw className="h-4 w-4" />
+          Thử phân tích lại
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -92,13 +125,13 @@ export function AIRecommendation({ currentProductId, category }: AIRecommendatio
 
       <div className="markdown-content text-base leading-relaxed relative prose prose-neutral dark:prose-invert max-w-none">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>
-          {recommendation}
+          {recommendation!}
         </ReactMarkdown>
       </div>
 
       <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-6 relative">
         <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
-          < TrickInfo className="h-4 w-4" />
+          <Info className="h-4 w-4" />
           {t('aiInfo')}
         </div>
         <Button className="w-full sm:w-auto rounded-2xl h-14 px-8 font-black text-sm uppercase tracking-widest shadow-xl shadow-primary/20 group overflow-hidden relative">
@@ -111,8 +144,4 @@ export function AIRecommendation({ currentProductId, category }: AIRecommendatio
       </div>
     </motion.div>
   );
-}
-
-function TrickInfo(props: any) {
-  return <Info {...props} />;
 }

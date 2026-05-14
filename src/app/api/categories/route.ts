@@ -6,7 +6,28 @@ import Category from '@/models/Category';
 export async function GET() {
   try {
     await dbConnect();
-    const categories = await Category.find({}).sort({ name: 1 });
+    // Use aggregation to count products for each category
+    const categories = await Category.aggregate([
+      {
+        $lookup: {
+          from: 'products',
+          localField: '_id',
+          foreignField: 'categories',
+          as: 'products'
+        }
+      },
+      {
+        $addFields: {
+          productCount: { $size: '$products' }
+        }
+      },
+      {
+        $project: {
+          products: 0 // Remove the products array to keep response small
+        }
+      },
+      { $sort: { productCount: -1, name: 1 } }
+    ]);
     return NextResponse.json({ success: true, data: categories });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 400 });

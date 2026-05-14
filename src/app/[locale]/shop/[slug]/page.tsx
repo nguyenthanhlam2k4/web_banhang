@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { Link } from '@/i18n/routing';
+import { Link, useRouter } from '@/i18n/routing';
 import axios from 'axios';
 import { 
   ShoppingCart, 
@@ -26,6 +26,7 @@ import { ProductCard } from '@/components/product/ProductCard';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { AIRecommendation } from '@/components/ai/AIRecommendation';
+import { ReviewSection } from '@/components/product/ReviewSection';
 import { useTranslations } from 'next-intl';
 
 export default function ProductDetailPage() {
@@ -41,14 +42,15 @@ export default function ProductDetailPage() {
   const [activeImage, setActiveImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const addItem = useCartStore((state) => state.addItem);
+  const router = useRouter();
 
   useEffect(() => {
     if (slug) fetchProduct();
   }, [slug]);
 
   const fetchProduct = async () => {
-    setLoading(true);
     try {
+      setLoading(true);
       const { data } = await axios.get(`/api/products/${slug}`);
       if (data.success) {
         setProduct(data.data);
@@ -56,16 +58,18 @@ export default function ProductDetailPage() {
       }
     } catch (error) {
       console.error('Failed to fetch product');
+      toast.error('Could not load product');
     } finally {
       setLoading(false);
     }
   };
 
   const fetchRelatedProducts = async (categoryId: string) => {
+    if (!categoryId) return;
     try {
-      const { data } = await axios.get(`/api/products?category=${categoryId}&limit=4`);
+      const { data } = await axios.get(`/api/products?category=${categoryId}`);
       if (data.success) {
-        setRelatedProducts(data.data.filter((p: any) => p.slug !== slug));
+        setRelatedProducts(data.data.filter((p: any) => p.slug !== slug).slice(0, 4));
       }
     } catch (error) {
       console.error('Failed to fetch related products');
@@ -75,6 +79,11 @@ export default function ProductDetailPage() {
   const handleAddToCart = () => {
     addItem(product, quantity);
     toast.success(t('addedToCart', { name: product.name, quantity }) || `Added ${quantity} ${product.name} to cart`);
+  };
+
+  const handleBuyNow = () => {
+    addItem(product, quantity);
+    router.push('/checkout');
   };
 
   if (loading) {
@@ -139,9 +148,13 @@ export default function ProductDetailPage() {
           <div className="space-y-8">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <Badge variant="outline" className="rounded-full px-4 py-1 border-primary/20 bg-primary/5 text-primary font-bold">
-                  {product.category?.name}
-                </Badge>
+                <div className="flex flex-wrap gap-2">
+                  {product.categories?.map((cat: any) => (
+                    <Badge key={cat._id} variant="outline" className="rounded-full px-4 py-1 border-primary/20 bg-primary/5 text-primary font-bold">
+                      {cat.name}
+                    </Badge>
+                  ))}
+                </div>
                 <div className="flex gap-2">
                   <Button variant="ghost" size="icon" className="rounded-full border border-border/50 hover:bg-secondary/50">
                     <Heart className="h-5 w-5" />
@@ -169,7 +182,7 @@ export default function ProductDetailPage() {
                     ))}
                   </div>
                   <span className="text-sm font-bold">{product.rating}</span>
-                  <span className="text-sm text-muted-foreground">({product.numReviews} {t('reviews') || 'Reviews'})</span>
+                  <span className="text-sm text-muted-foreground">({product.numReviews} {t('reviews.label')})</span>
                 </div>
                 <div className="h-4 w-px bg-border/50" />
                 <div className="flex items-center gap-1.5 text-sm">
@@ -251,6 +264,7 @@ export default function ProductDetailPage() {
                   variant="outline" 
                   className="flex-1 rounded-2xl h-16 text-lg font-bold border-2"
                   disabled={product.stock === 0}
+                  onClick={handleBuyNow}
                 >
                   {t('buyNow') || 'Buy Now'}
                 </Button>
@@ -285,7 +299,16 @@ export default function ProductDetailPage() {
         <div className="mt-20">
           <AIRecommendation 
             currentProductId={product._id} 
-            category={product.category?._id} 
+            category={product.categories?.[0]?._id} 
+          />
+        </div>
+
+        {/* Reviews Section */}
+        <div className="mt-32 pt-32 border-t border-border/50">
+          <ReviewSection 
+            productId={product._id} 
+            initialRating={product.rating} 
+            initialNumReviews={product.numReviews} 
           />
         </div>
 

@@ -7,7 +7,7 @@ export interface IProduct extends Document {
   price: number;
   comparePrice?: number;
   images: string[];
-  category: mongoose.Types.ObjectId;
+  categories: mongoose.Types.ObjectId[];
   brand: string;
   stock: number;
   rating: number;
@@ -52,11 +52,12 @@ const ProductSchema: Schema = new Schema(
       type: [String],
       required: [true, 'Please provide at least one image'],
     },
-    category: {
-      type: Schema.Types.ObjectId,
-      ref: 'Category',
-      required: [true, 'Please provide a category'],
-    },
+    categories: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Category',
+      }
+    ],
     brand: {
       type: String,
       required: [true, 'Please provide a brand'],
@@ -94,5 +95,10 @@ const ProductSchema: Schema = new Schema(
 
 // Add index for search
 ProductSchema.index({ name: 'text', description: 'text', brand: 'text', tags: 'text' });
+
+// In development, we might need to delete the model to force re-registration if schema changes
+if (process.env.NODE_ENV === 'development') {
+  delete (mongoose as any).models.Product;
+}
 
 export default mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);
