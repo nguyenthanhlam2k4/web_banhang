@@ -50,7 +50,7 @@ export default function AdminProductsPage() {
         setProducts(data.data);
         setPagination(data.pagination);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Fetch Error:', error.response?.data || error.message);
       toast.error(t('products.fetchError'));
     } finally {
@@ -66,7 +66,7 @@ export default function AdminProductsPage() {
         toast.success(t('products.deleteSuccess'));
         fetchProducts();
       }
-    } catch (error) {
+    } catch (error: any) {
       toast.error(t('products.deleteError'));
     }
   };

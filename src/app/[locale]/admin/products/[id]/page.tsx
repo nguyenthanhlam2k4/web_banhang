@@ -87,7 +87,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         }));
         setSpecifications(specsWithId);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Fetch Data Error:', error.response?.data || error.message);
       toast.error(t('fetchError'));
       router.push('/admin/products');

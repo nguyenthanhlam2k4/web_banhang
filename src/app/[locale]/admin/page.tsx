@@ -37,7 +37,7 @@ export default function AdminDashboard() {
       if (data.success) {
         setData(data);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch admin stats');
     } finally {
       setLoading(false);

@@ -50,7 +50,7 @@ export default function UserManagementPage() {
       setLoading(true);
       const response = await axios.get('/api/admin/users');
       setUsers(response.data);
-    } catch (error) {
+    } catch (error: any) {
       toast.error(t('users.fetchError'));
     } finally {
       setLoading(false);
@@ -67,7 +67,7 @@ export default function UserManagementPage() {
       await axios.patch(`/api/admin/users/${userId}`, { role: newRole });
       toast.success(t('users.updateSuccess'));
       fetchUsers();
-    } catch (error) {
+    } catch (error: any) {
       toast.error('Failed to update role');
     }
   };
@@ -78,7 +78,7 @@ export default function UserManagementPage() {
       await axios.delete(`/api/admin/users/${userId}`);
       toast.success(t('users.deleteSuccess'));
       fetchUsers();
-    } catch (error) {
+    } catch (error: any) {
       toast.error(t('users.deleteError') || 'Failed to delete user');
     }
   };

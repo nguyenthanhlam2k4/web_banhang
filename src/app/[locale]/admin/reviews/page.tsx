@@ -43,7 +43,7 @@ export default function AdminReviewsPage() {
         setReviews(data.data);
         setPagination(data.pagination);
       }
-    } catch (error) {
+    } catch (error: any) {
       toast.error('Failed to fetch reviews');
     } finally {
       setLoading(false);
@@ -58,7 +58,7 @@ export default function AdminReviewsPage() {
         toast.success('Review deleted');
         fetchReviews();
       }
-    } catch (error) {
+    } catch (error: any) {
       toast.error('Failed to delete review');
     }
   };

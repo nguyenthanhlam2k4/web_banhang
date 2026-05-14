@@ -52,7 +52,7 @@ export default function AdminOrdersPage() {
       if (data.success) {
         setOrders(data.data);
       }
-    } catch (error) {
+    } catch (error: any) {
       toast.error(t('orders.fetchError'));
     } finally {
       setLoading(false);
@@ -66,7 +66,7 @@ export default function AdminOrdersPage() {
         toast.success(t('orders.updateSuccess'));
         fetchOrders();
       }
-    } catch (error) {
+    } catch (error: any) {
       toast.error('Failed to update order status');
     }
   };

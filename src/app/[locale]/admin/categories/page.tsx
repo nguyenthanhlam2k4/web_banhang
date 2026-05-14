@@ -45,7 +45,7 @@ export default function AdminCategoriesPage() {
     try {
       const { data } = await axios.get('/api/categories');
       if (data.success) setCategories(data.data);
-    } catch (error) {
+    } catch (error: any) {
       toast.error(t('categories.fetchError'));
     } finally {
       setLoading(false);
@@ -105,7 +105,7 @@ export default function AdminCategoriesPage() {
         toast.success(t('categories.deleteSuccess'));
         fetchCategories();
       }
-    } catch (error) {
+    } catch (error: any) {
       toast.error(t('categories.deleteError'));
     }
   };
