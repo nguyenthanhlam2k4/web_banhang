@@ -26,8 +26,17 @@ export async function POST(req: Request) {
       );
     }
 
-    // Generate token
-    const token = signToken({ id: user._id });
+    // Auto-promote if matches ADMIN_EMAIL
+    if (email.toLowerCase() === process.env.ADMIN_EMAIL?.toLowerCase() && user.role !== 'admin') {
+      user.role = 'admin';
+      await user.save();
+    }
+
+    // Generate token with role
+    const token = signToken({ 
+      id: user._id,
+      role: user.role 
+    });
 
     const response = NextResponse.json(
       {

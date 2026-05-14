@@ -5,13 +5,14 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Loader2, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/routing';
 import { toast } from 'sonner';
 import axios from 'axios';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useTranslations } from 'next-intl';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -21,6 +22,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
+  const t = useTranslations('Auth');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -39,11 +41,11 @@ export function LoginForm() {
     try {
       const response = await axios.post('/api/auth/login', data);
       setAuth(response.data.user, response.data.token);
-      toast.success('Welcome back!');
+      toast.success(t('loginSuccess') || 'Welcome back!');
       router.push('/');
       router.refresh();
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Login failed');
+      toast.error(error.response?.data?.message || t('loginFailed') || 'Login failed');
     } finally {
       setIsLoading(false);
     }
@@ -53,7 +55,7 @@ export function LoginForm() {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="space-y-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium text-muted-foreground ml-1">Email Address</label>
+          <label className="text-sm font-medium text-muted-foreground ml-1">{t('email')}</label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -67,7 +69,7 @@ export function LoginForm() {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-muted-foreground ml-1">Password</label>
+          <label className="text-sm font-medium text-muted-foreground ml-1">{t('password')}</label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -92,10 +94,10 @@ export function LoginForm() {
       <div className="flex items-center justify-between px-1">
         <label className="flex items-center gap-2 text-sm cursor-pointer group">
           <input type="checkbox" className="rounded border-border bg-secondary text-primary focus:ring-primary h-4 w-4" />
-          <span className="text-muted-foreground group-hover:text-foreground transition-colors">Remember me</span>
+          <span className="text-muted-foreground group-hover:text-foreground transition-colors">{t('rememberMe') || 'Remember me'}</span>
         </label>
         <button type="button" className="text-sm text-primary hover:underline font-medium">
-          Forgot password?
+          {t('forgotPassword')}
         </button>
       </div>
 
@@ -103,12 +105,13 @@ export function LoginForm() {
         {isLoading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Signing in...
+            {t('signingIn') || 'Signing in...'}
           </>
         ) : (
-          'Sign In'
+          t('login')
         )}
       </Button>
     </form>
   );
 }
+

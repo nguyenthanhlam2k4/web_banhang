@@ -1,0 +1,75 @@
+# TÀI LIỆU KỸ THUẬT - ECOMMERCE PLATFORM (PHASE 1)
+
+## 1. Tổng Quan (Overview)
+Phase 1 tập trung vào việc xây dựng nền tảng (Foundation), giao diện người dùng (UI/UX) và hệ thống xác thực (Authentication) cho nền tảng thương mại điện tử cao cấp.
+
+## 2. Kiến Trúc Hệ Thống (Architecture)
+Dự án được xây dựng dựa trên kiến trúc **Clean Architecture** kết hợp với **Next.js App Router**:
+
+- **Frontend Layer**: Sử dụng React 19 và Next.js 16.
+- **Styling**: TailwindCSS 4 với hệ thống Design Token tùy chỉnh.
+- **State Management**: Zustand để quản lý trạng thái ứng dụng (Auth, Cart).
+- **Backend Layer**: Next.js API Routes (Serverless Functions).
+- **Database Layer**: MongoDB kết hợp với Mongoose ODM.
+- **Security**: Xác thực dựa trên JWT (JSON Web Token) lưu trữ trong HttpOnly Cookie.
+
+### Cấu trúc thư mục (Folder Structure):
+- `src/app`: Định nghĩa các route và layout.
+- `src/components`: Chứa các UI components (layout, shared, auth, home).
+- `src/lib`: Các tiện ích kết nối database, helper functions.
+- `src/models`: Định nghĩa các Schema Mongoose.
+- `src/services`: Xử lý logic API.
+- `src/store`: Quản lý trạng thái toàn cục (Zustand).
+- `src/types`: Định nghĩa TypeScript Interfaces.
+
+## 3. Công Nghệ Sử Dụng (Tech Stack)
+- **Next.js 16 (App Router)**: Framework React mạnh mẽ nhất hiện nay.
+- **React 19**: Tận dụng các tính năng mới như Server Components.
+- **Base UI & shadcn/ui**: Hệ thống component UI hiện đại, linh hoạt.
+- **Framer Motion**: Tạo các hiệu ứng chuyển động (animations) cao cấp.
+- **Mongoose**: Quản lý dữ liệu MongoDB hiệu quả.
+- **Lucide React**: Thư viện icon (đã tùy chỉnh cho phiên bản 1.0+).
+- **Zustand**: Quản lý state nhẹ và nhanh.
+
+## 4. Các Chức Năng Chính (Key Features)
+### 4.1. Hệ thống Giao diện (UI System)
+- **Responsive Design**: Tương thích hoàn toàn với Mobile, Tablet và Desktop.
+- **Dark/Light Mode**: Hỗ trợ chuyển đổi giao diện mượt mà với `next-themes`.
+- **Glassmorphism**: Hiệu ứng kính mờ cho Navbar và các thẻ nội dung.
+- **Premium Hero Section**: Banner động với hiệu ứng chuyển động từ Framer Motion.
+
+### 4.2. Xác thực & Bảo mật (Auth & Security)
+- **Đăng ký/Đăng nhập**: Xử lý logic tại Client và Server.
+- **JWT Authentication**: Token được mã hóa và bảo mật trong Cookie không thể truy cập từ JS (HttpOnly).
+- **Bcryptjs**: Mã hóa mật khẩu một chiều trước khi lưu vào database.
+- **Route Protection**: Middleware kiểm tra quyền truy cập của người dùng trước khi vào các trang bảo mật.
+
+### 4.3. Quản lý trạng thái (State Management)
+- **Persistent Auth**: Trạng thái đăng nhập được duy trì sau khi tải lại trang nhờ Zustand Middleware.
+
+## 5. Luồng Hoạt Động (Operation Flow)
+1. **Kết nối Database**: Ứng dụng sử dụng cơ chế connection pooling trong `dbConnect.ts` để tối ưu hóa kết nối MongoDB.
+2. **Xác thực**: 
+   - Khi đăng nhập, server tạo JWT và gửi về client qua Cookie.
+   - Middleware kiểm tra Cookie này cho mỗi yêu cầu đến các route bảo mật.
+3. **Giao diện**: Các component sử dụng Server Components cho hiệu năng cao và Client Components cho các tương tác người dùng.
+
+## 6. Hướng Dẫn Sử Dụng (Usage)
+### 6.1. Cài đặt môi trường:
+Tạo file `.env.local` tại root project với các biến sau:
+```env
+MONGODB_URI=your_mongodb_uri
+JWT_SECRET=your_secret_key
+NEXT_PUBLIC_API_URL=http://localhost:3000
+```
+
+### 6.2. Chạy ứng dụng:
+1. Cài đặt thư viện: `npm install`
+2. Chạy chế độ phát triển: `npm run dev`
+3. Truy cập: `http://localhost:3000`
+
+### 6.3. Kiểm tra Build:
+Để kiểm tra tính ổn định của mã nguồn, chạy lệnh: `npm run build`
+
+---
+*Tài liệu được tạo bởi Antigravity AI Coding Assistant.*

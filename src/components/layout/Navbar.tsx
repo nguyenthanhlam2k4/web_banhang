@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { 
   Search, 
   ShoppingCart, 
@@ -14,15 +13,18 @@ import {
   LogOut,
   Package,
   Settings,
-  Heart
+  Heart,
+  LayoutDashboard
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import { useAuthStore } from '@/store/useAuthStore';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import {
   Sheet,
   SheetContent,
@@ -37,20 +39,25 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
 
-const NAV_LINKS = [
-  { name: 'Home', href: '/' },
-  { name: 'Shop', href: '/shop' },
-  { name: 'Categories', href: '/categories' },
-  { name: 'About', href: '/about' },
-];
+import { CartDrawer } from '@/components/cart/CartDrawer';
 
 export function Navbar() {
+  const t = useTranslations('Navbar');
+  const ct = useTranslations('Common');
   const pathname = usePathname();
   const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const { user, clearAuth } = useAuthStore();
+
+  const NAV_LINKS = [
+    { name: t('home'), href: '/' },
+    { name: t('shop'), href: '/shop' },
+    { name: t('categories'), href: '/categories' },
+    { name: t('about'), href: '/about' },
+  ] as const;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -64,11 +71,11 @@ export function Navbar() {
     try {
       await axios.post('/api/auth/logout');
       clearAuth();
-      toast.success('Logged out successfully');
+      toast.success(t('logoutSuccess') || 'Logged out successfully');
       router.push('/');
       router.refresh();
     } catch (error) {
-      toast.error('Logout failed');
+      toast.error(t('logoutError') || 'Logout failed');
     }
   };
 
@@ -96,7 +103,7 @@ export function Navbar() {
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.name}
-                href={link.href}
+                href={link.href as any}
                 className={cn(
                   'text-sm font-medium transition-colors hover:text-primary',
                   pathname === link.href ? 'text-primary' : 'text-muted-foreground'
@@ -114,52 +121,68 @@ export function Navbar() {
               <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Search products..."
+                placeholder={ct('search')}
                 className="pl-10 w-64 bg-secondary/50 border-none rounded-full h-10 focus-visible:ring-1"
               />
             </div>
 
+            <LanguageSwitcher />
             <ThemeToggle />
 
-            <Link href="/cart">
-              <Button variant="ghost" size="icon" className="relative rounded-full">
-                <ShoppingCart className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 h-4 w-4 bg-primary text-[10px] font-bold text-primary-foreground rounded-full flex items-center justify-center">
-                  0
-                </span>
-              </Button>
-            </Link>
+            <CartDrawer />
 
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full overflow-hidden border border-border/50">
-                    <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" />
+                  <Button variant="ghost" size="icon" className="rounded-full overflow-hidden border border-border/50 outline-none">
+                    {user.avatar ? (
+                      <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" />
+                    ) : (
+                      <UserIcon className="h-5 w-5" />
+                    )}
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2">
-                  <DropdownMenuLabel className="font-normal p-3">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-bold leading-none">{user.name}</p>
-                      <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
-                    </div>
-                  </DropdownMenuLabel>
+                <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 bg-popover border border-border/50 shadow-xl">
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel className="font-normal p-3">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-bold leading-none">{user.name}</p>
+                        <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                      </div>
+                    </DropdownMenuLabel>
+                  </DropdownMenuGroup>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="rounded-xl p-3 cursor-pointer">
-                    <UserIcon className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
+                  {user.role === 'admin' && (
+                    <DropdownMenuItem asChild className="rounded-xl p-3 cursor-pointer text-primary bg-primary/5 focus:bg-primary/10">
+                      <Link href="/admin" className="flex items-center w-full">
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        <span>{t('admin')}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem asChild className="rounded-xl p-3 cursor-pointer">
+                    <Link href="/profile" className="flex items-center w-full">
+                      <UserIcon className="mr-2 h-4 w-4" />
+                      <span>{t('profile')}</span>
+                    </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="rounded-xl p-3 cursor-pointer">
-                    <Package className="mr-2 h-4 w-4" />
-                    <span>My Orders</span>
+                  <DropdownMenuItem asChild className="rounded-xl p-3 cursor-pointer">
+                    <Link href="/orders" className="flex items-center w-full">
+                      <Package className="mr-2 h-4 w-4" />
+                      <span>{t('orders') || 'My Orders'}</span>
+                    </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="rounded-xl p-3 cursor-pointer">
-                    <Heart className="mr-2 h-4 w-4" />
-                    <span>Wishlist</span>
+                  <DropdownMenuItem asChild className="rounded-xl p-3 cursor-pointer">
+                    <Link href="/wishlist" className="flex items-center w-full">
+                      <Heart className="mr-2 h-4 w-4" />
+                      <span>{t('wishlist') || 'Wishlist'}</span>
+                    </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="rounded-xl p-3 cursor-pointer">
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
+                  <DropdownMenuItem asChild className="rounded-xl p-3 cursor-pointer">
+                    <Link href="/settings" className="flex items-center w-full">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>{t('settings') || 'Settings'}</span>
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem 
@@ -167,14 +190,14 @@ export function Navbar() {
                     onClick={handleLogout}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
-                    <span>Logout</span>
+                    <span>{t('logout')}</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <Link href="/login" className="hidden sm:block">
                 <Button variant="default" className="rounded-full px-6">
-                  Login
+                  {t('login')}
                 </Button>
               </Link>
             )}
@@ -198,7 +221,7 @@ export function Navbar() {
                     {NAV_LINKS.map((link) => (
                       <Link
                         key={link.name}
-                        href={link.href}
+                        href={link.href as any}
                         className={cn(
                           'text-lg font-medium py-2 border-b border-border/50',
                           pathname === link.href ? 'text-primary' : 'text-foreground'
@@ -210,15 +233,15 @@ export function Navbar() {
                     <div className="flex flex-col gap-4 mt-4">
                       {user ? (
                         <Button variant="destructive" className="w-full rounded-xl py-6" onClick={handleLogout}>
-                          Logout
+                          {t('logout')}
                         </Button>
                       ) : (
                         <>
                           <Link href="/login">
-                            <Button className="w-full rounded-xl py-6">Login</Button>
+                            <Button className="w-full rounded-xl py-6">{t('login')}</Button>
                           </Link>
                           <Link href="/register">
-                            <Button variant="outline" className="w-full rounded-xl py-6">Register</Button>
+                            <Button variant="outline" className="w-full rounded-xl py-6">{t('register')}</Button>
                           </Link>
                         </>
                       )}
@@ -233,4 +256,5 @@ export function Navbar() {
     </header>
   );
 }
+
 

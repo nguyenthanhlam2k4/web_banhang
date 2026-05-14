@@ -5,13 +5,14 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Loader2, Mail, Lock, Eye, EyeOff, User } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/routing';
 import { toast } from 'sonner';
 import axios from 'axios';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useTranslations } from 'next-intl';
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -26,6 +27,7 @@ const registerSchema = z.object({
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export function RegisterForm() {
+  const t = useTranslations('Auth');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -48,11 +50,11 @@ export function RegisterForm() {
         password: data.password
       });
       setAuth(response.data.user, response.data.token);
-      toast.success('Account created successfully!');
+      toast.success(t('registerSuccess') || 'Account created successfully!');
       router.push('/');
       router.refresh();
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Registration failed');
+      toast.error(error.response?.data?.message || t('registerFailed') || 'Registration failed');
     } finally {
       setIsLoading(false);
     }
@@ -62,7 +64,7 @@ export function RegisterForm() {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="space-y-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium text-muted-foreground ml-1">Full Name</label>
+          <label className="text-sm font-medium text-muted-foreground ml-1">{t('name')}</label>
           <div className="relative">
             <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -76,7 +78,7 @@ export function RegisterForm() {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-muted-foreground ml-1">Email Address</label>
+          <label className="text-sm font-medium text-muted-foreground ml-1">{t('email')}</label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -90,7 +92,7 @@ export function RegisterForm() {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-muted-foreground ml-1">Password</label>
+          <label className="text-sm font-medium text-muted-foreground ml-1">{t('password')}</label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -112,7 +114,7 @@ export function RegisterForm() {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-muted-foreground ml-1">Confirm Password</label>
+          <label className="text-sm font-medium text-muted-foreground ml-1">{t('confirmPassword')}</label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -131,12 +133,13 @@ export function RegisterForm() {
         {isLoading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Creating account...
+            {t('creatingAccount') || 'Creating account...'}
           </>
         ) : (
-          'Create Account'
+          t('register')
         )}
       </Button>
     </form>
   );
 }
+

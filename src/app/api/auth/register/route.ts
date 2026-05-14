@@ -18,14 +18,19 @@ export async function POST(req: Request) {
     }
 
     // Create user
+    const isAdminEmail = email.toLowerCase() === process.env.ADMIN_EMAIL?.toLowerCase();
     const user = await User.create({
       name,
       email,
       password,
+      role: isAdminEmail ? 'admin' : 'user',
     });
 
-    // Generate token
-    const token = signToken({ id: user._id });
+    // Generate token with role
+    const token = signToken({ 
+      id: user._id,
+      role: user.role 
+    });
 
     const response = NextResponse.json(
       {

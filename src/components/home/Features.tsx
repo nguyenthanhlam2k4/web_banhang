@@ -3,35 +3,38 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Truck, ShieldCheck, Zap, Headphones } from 'lucide-react';
-
-const FEATURES = [
-  {
-    title: 'Free Shipping',
-    desc: 'On all orders over $100',
-    icon: Truck,
-    color: 'text-blue-500'
-  },
-  {
-    title: 'Secure Payment',
-    desc: '100% secure payment methods',
-    icon: ShieldCheck,
-    color: 'text-emerald-500'
-  },
-  {
-    title: 'Fast Delivery',
-    desc: 'Deliver within 24-48 hours',
-    icon: Zap,
-    color: 'text-orange-500'
-  },
-  {
-    title: '24/7 Support',
-    desc: 'Dedicated customer support',
-    icon: Headphones,
-    color: 'text-violet-500'
-  }
-];
+import { useTranslations } from 'next-intl';
 
 export function Features() {
+  const t = useTranslations('Features');
+
+  const FEATURES = [
+    {
+      title: t('shipping'),
+      desc: t('shippingDesc'),
+      icon: Truck,
+      color: 'text-blue-500'
+    },
+    {
+      title: t('payment'),
+      desc: t('paymentDesc'),
+      icon: ShieldCheck,
+      color: 'text-emerald-500'
+    },
+    {
+      title: t('returns'),
+      desc: t('returnsDesc'),
+      icon: Zap,
+      color: 'text-orange-500'
+    },
+    {
+      title: t('support'),
+      desc: t('supportDesc'),
+      icon: Headphones,
+      color: 'text-violet-500'
+    }
+  ];
+
   return (
     <section className="py-24 bg-background">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -40,7 +43,7 @@ export function Features() {
             const Icon = feature.icon;
             return (
               <motion.div
-                key={feature.title}
+                key={idx}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -62,3 +65,4 @@ export function Features() {
     </section>
   );
 }
+

@@ -1,12 +1,15 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';
 import { motion } from 'framer-motion';
 import { ArrowRight, ShoppingBag, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslations } from 'next-intl';
 
 export function Hero() {
+  const t = useTranslations('Hero');
+
   return (
     <section className="relative overflow-hidden pt-20 pb-12 lg:pt-32 lg:pb-24">
       {/* Background Decor */}
@@ -26,7 +29,7 @@ export function Hero() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold border border-primary/20"
             >
               <Sparkles className="h-4 w-4" />
-              New Collection 2026 is Live
+              {t('badge')}
             </motion.div>
 
             <motion.h1
@@ -35,9 +38,9 @@ export function Hero() {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.1]"
             >
-              Experience <br />
-              <span className="gradient-text">Premium Shopping</span> <br />
-              Like Never Before
+              {t('title')} <br />
+              <span className="gradient-text">{t('titleGradient')}</span> <br />
+              {t('titleSuffix')}
             </motion.h1>
 
             <motion.p
@@ -46,7 +49,7 @@ export function Hero() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-lg text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed"
             >
-              Discover our curated collection of high-end lifestyle products. From minimalist electronics to handcrafted fashion, we bring you the pinnacle of quality and design.
+              {t('description')}
             </motion.p>
 
             <motion.div
@@ -57,13 +60,13 @@ export function Hero() {
             >
               <Link href="/shop" className="w-full sm:w-auto">
                 <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-base font-semibold rounded-2xl group premium-shadow">
-                  Shop Collection
+                  {t('shopNow')}
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
               <Link href="/categories" className="w-full sm:w-auto">
                 <Button variant="outline" size="lg" className="w-full sm:w-auto h-14 px-8 text-base font-semibold rounded-2xl bg-background/50">
-                  Explore Categories
+                  {t('explore')}
                 </Button>
               </Link>
             </motion.div>
@@ -76,9 +79,9 @@ export function Hero() {
               className="flex flex-wrap justify-center lg:justify-start gap-8 pt-8 border-t border-border/50 lg:border-none"
             >
               {[
-                { label: 'Happy Customers', value: '50k+' },
-                { label: 'Premium Products', value: '2k+' },
-                { label: 'Store Locations', value: '12' },
+                { label: t('stats.customers'), value: '50k+' },
+                { label: t('stats.products'), value: '2k+' },
+                { label: t('stats.locations'), value: '12' },
               ].map((stat, idx) => (
                 <div key={idx} className="text-center lg:text-left">
                   <p className="text-2xl font-bold">{stat.value}</p>
@@ -103,8 +106,8 @@ export function Hero() {
               <div className="absolute bottom-8 left-8 right-8 p-6 glass rounded-2xl">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-semibold text-primary mb-1">Featured Item</p>
-                    <h3 className="text-xl font-bold">Premium Minimal Watch</h3>
+                    <p className="text-sm font-semibold text-primary mb-1">{t('featured')}</p>
+                    <h3 className="text-xl font-bold">{t('watchTitle')}</h3>
                     <p className="text-sm text-muted-foreground">$299.00</p>
                   </div>
                   <Button size="icon" className="rounded-full h-12 w-12">
@@ -130,3 +133,4 @@ export function Hero() {
     </section>
   );
 }
+
