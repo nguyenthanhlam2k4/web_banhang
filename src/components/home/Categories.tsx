@@ -88,7 +88,7 @@ export function Categories() {
                       <Icon className="h-8 w-8" />
                     </div>
                     <h3 className="text-xl font-bold mb-1 line-clamp-1">{category.name}</h3>
-                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{category.description || t('categoriesSection.fallbackDesc')}</p>
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{category.description || t('categoriesSection.fallbackDesc', { name: category.name })}</p>
                     <div className="flex items-center text-xs font-bold text-primary opacity-0 group-hover:opacity-100 transition-all">
                       {t('categoriesSection.exploreNow')}
                       <ArrowRight className="ml-2 h-3 w-3" />

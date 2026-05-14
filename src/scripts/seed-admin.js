@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-
-const MONGODB_URI = "mongodb+srv://thanhlamkh2004_db_user:5q8OCzTDEyJjxaU0@cluster0.wx9qzhr.mongodb.net/?appName=Cluster0";
+require('dotenv').config({ path: '.env.local' });
+const MONGODB_URI = process.env.MONGODB_URI;
 
 const userSchema = new mongoose.Schema({
   name: String,
@@ -18,8 +18,8 @@ async function createAdmin() {
     await mongoose.connect(MONGODB_URI);
     console.log('Connected to MongoDB');
 
-    const email = 'admin@gmail.com';
-    const password = '123456';
+    const email = process.env.ADMIN_EMAIL || 'admin@gmail.com';
+    const password = process.env.ADMIN_PASSWORD || 'admin123';
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 

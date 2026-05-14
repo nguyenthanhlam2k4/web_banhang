@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
+require('dotenv').config({ path: '.env.local' });
 
-// Update this URI if different
-const MONGODB_URI = "mongodb+srv://thanhlamkh2004_db_user:5q8OCzTDEyJjxaU0@cluster0.wx9qzhr.mongodb.net/?appName=Cluster0";
+const MONGODB_URI = process.env.MONGODB_URI;
 
 const userSchema = new mongoose.Schema({
   email: String,
